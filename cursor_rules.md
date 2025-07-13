@@ -1,9 +1,3 @@
----
-description: Project Description
-globs:
-alwaysApply: true
----
-
 # Project: VS Code Extension "translate-me"
 
 I'm developing a VS Code extension that detects literal strings in Flutter projects to facilitate internationalization (i18n).

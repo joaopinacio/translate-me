@@ -17,7 +17,7 @@
     "commands": [
       {
         "command": "translate-me.scan",
-        "title": "Flutter I18n: Scan por Strings Fixas"
+        "title": "Translate Me: Scan"
       }
     ]
   },

@@ -6,7 +6,7 @@ import { WidgetPattern } from './types';
 
 export const EXTENSION_NAME = 'translate-me';
 export const DART_LANGUAGE_ID = 'dart';
-export const SCAN_COMPLETE_MESSAGE = 'Scan por strings fixas completo.';
+export const SCAN_COMPLETE_MESSAGE = 'Scan completed.';
 
 // Ignore comment patterns
 export const IGNORE_COMMENTS = {
@@ -17,21 +17,70 @@ export const IGNORE_COMMENTS = {
 
 // Widget patterns for known Flutter widgets
 export const KNOWN_WIDGET_PATTERNS: WidgetPattern[] = [
+    // Text widgets
     { widget: 'Text', params: ['', 'data'] },
+    { widget: 'RichText', params: ['text'] },
+
+    // UI Components
     { widget: 'Tooltip', params: ['message'] },
     { widget: 'SnackBar', params: ['content'] },
     { widget: 'AppBar', params: ['title'] },
+
+    // Buttons
     { widget: 'ElevatedButton', params: ['child'] },
     { widget: 'TextButton', params: ['child'] },
     { widget: 'OutlinedButton', params: ['child'] },
+    { widget: 'IconButton', params: ['tooltip'] },
     { widget: 'FloatingActionButton', params: ['tooltip', 'child'] },
+
+    // Dialogs and overlays
     { widget: 'AlertDialog', params: ['title', 'content'] },
+    { widget: 'SimpleDialog', params: ['title'] },
+    { widget: 'BottomSheet', params: [''] },
+
+    // Navigation
     { widget: 'ListTile', params: ['title', 'subtitle', 'leading', 'trailing'] },
     { widget: 'BottomNavigationBarItem', params: ['label', 'tooltip'] },
     { widget: 'Tab', params: ['text', 'child'] },
+    { widget: 'TabBar', params: [''] },
+    { widget: 'Drawer', params: ['child'] },
+
+    // Cards and containers
     { widget: 'Card', params: ['child'] },
     { widget: 'Chip', params: ['label'] },
+    { widget: 'Badge', params: ['label'] },
+
+    // Form inputs
+    { widget: 'TextField', params: [''] },
+    { widget: 'TextFormField', params: [''] },
     { widget: 'InputDecoration', params: ['labelText', 'hintText', 'helperText', 'errorText'] },
+    { widget: 'DropdownButton', params: ['hint'] },
+    { widget: 'DropdownMenuItem', params: ['child'] },
+
+    // Progress indicators
+    { widget: 'LinearProgressIndicator', params: [''] },
+    { widget: 'CircularProgressIndicator', params: [''] },
+
+    // Cupertino widgets (iOS style)
+    { widget: 'CupertinoButton', params: ['child'] },
+    { widget: 'CupertinoAlertDialog', params: ['title', 'content'] },
+    { widget: 'CupertinoActionSheet', params: ['title', 'message'] },
+    { widget: 'CupertinoNavigationBar', params: ['middle'] },
+    { widget: 'CupertinoTextField', params: ['placeholder'] },
+
+    // Stepper and expansion
+    { widget: 'Stepper', params: [''] },
+    { widget: 'ExpansionTile', params: ['title'] },
+    { widget: 'ExpansionPanel', params: ['headerBuilder'] },
+
+    // Menu and popup
+    { widget: 'PopupMenuButton', params: ['tooltip'] },
+    { widget: 'PopupMenuItem', params: ['child'] },
+
+    // Data display
+    { widget: 'DataTable', params: [''] },
+    { widget: 'DataColumn', params: ['label'] },
+    { widget: 'DataCell', params: [''] },
 ];
 
 // Patterns for classes that are not widgets
