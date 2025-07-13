@@ -8,6 +8,11 @@ export const EXTENSION_NAME = 'translate-me';
 export const DART_LANGUAGE_ID = 'dart';
 export const SCAN_COMPLETE_MESSAGE = 'Scan completed.';
 
+// Toggle command constants
+export const TOGGLE_COMMAND_ID = 'translate-me.toggle';
+export const DETECTION_ENABLED_MESSAGE = 'Translate Me: Detection enabled';
+export const DETECTION_DISABLED_MESSAGE = 'Translate Me: Detection disabled';
+
 // Ignore comment patterns
 export const IGNORE_COMMENTS = {
     LINE: '// translate-me-ignore',

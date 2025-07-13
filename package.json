@@ -10,6 +10,7 @@
   "activationEvents": [
     "onLanguage:dart",
     "onCommand:translate-me.scan",
+    "onCommand:translate-me.toggle",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -18,6 +19,10 @@
       {
         "command": "translate-me.scan",
         "title": "Translate Me: Scan"
+      },
+      {
+        "command": "translate-me.toggle",
+        "title": "Translate Me: Toggle Detection"
       }
     ]
   },

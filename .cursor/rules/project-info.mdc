@@ -29,7 +29,7 @@ I'm developing a VS Code extension that detects literal strings in Flutter proje
   2. Add ignore comment at end of line
   3. Add file-level ignore comment
 * Automatic activation on .dart file save/open
-* Manual command: "Flutter I18n: Scan for Hardcoded Strings"
+* Manual command: "Translate Me: Scan"
 * Debounced scanning for performance
 
 ### Smart Detection Features

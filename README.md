@@ -11,6 +11,7 @@ A VS Code extension that detects hardcoded strings in Flutter projects to facili
 - 📝 Manual scan command
 - 🎨 Visual diagnostics in the editor
 - ⚡ **Quick Actions** to easily ignore strings
+- 🔄 **Toggle Detection** - Enable/disable detection on demand
 
 ## Quick Actions
 
@@ -104,6 +105,7 @@ The extension uses a **two-tier detection system** for optimal performance:
 - **Faster scanning**: Most common widgets detected immediately
 - **Scalable**: Handles projects with hundreds of custom widgets
 - **Memory efficient**: Avoids unnecessary regex compilation
+- **Toggle Control**: Disable detection entirely for maximum performance when not needed
 
 **🎯 Smart Fallback Strategy:**
 ```
@@ -154,9 +156,16 @@ The extension supports three types of ignore comments:
 
 1. **Write your Flutter code normally**
 2. **Yellow underlines appear** on hardcoded strings
-3. **Click the lightbulb 💡** or press `Ctrl+.` / `Cmd+.`
-4. **Choose an ignore option** that fits your needs
+3. **Choose one of the following options**:
+   - **Option A**: Click the lightbulb 💡 or press `Ctrl+.` / `Cmd+.` to ignore specific strings
+   - **Option B**: Use `Translate Me: Toggle Detection` to disable all warnings temporarily
+4. **If using Option A**: Choose an ignore option that fits your needs
 5. **String is automatically ignored** - no more warnings!
+
+### When to Use Toggle Detection:
+- **Disable**: When focusing on other tasks and don't want to see warnings
+- **Enable**: When ready to work on internationalization
+- **Temporary**: Perfect for presentations or demos without distractions
 
 ## Code Quality
 
@@ -170,7 +179,33 @@ This project follows:
 
 ## Commands
 
-- `Flutter I18n: Scan for Hardcoded Strings` - Manual scan command
+### Manual Scan
+- **Command**: `Translate Me: Scan`
+- **Description**: Manually scans the entire workspace for hardcoded strings
+- **Note**: Only works when detection is enabled
+
+### Toggle Detection
+- **Command**: `Translate Me: Toggle Detection`
+- **Description**: Enable or disable hardcoded string detection
+- **Default**: Detection is **enabled** by default
+
+#### Toggle Behavior:
+- **When ENABLED**: 
+  - Performs automatic scanning on file save/change
+  - Shows yellow underlines for hardcoded strings
+  - Manual scan command works
+  - Displays message: "Translate Me: Detection enabled"
+
+- **When DISABLED**:
+  - **Removes ALL warnings/diagnostics** from the editor
+  - Disables automatic scanning 
+  - Manual scan command is ignored
+  - Displays message: "Translate Me: Detection disabled"
+
+#### How to Use:
+1. Open Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+2. Type "Translate Me: Toggle Detection"
+3. Press Enter to toggle
 
 ## Development
 

@@ -4,12 +4,20 @@
  */
 
 import * as vscode from 'vscode';
-import { EXTENSION_NAME, DART_LANGUAGE_ID, SCAN_COMPLETE_MESSAGE } from './constants';
+import {
+  EXTENSION_NAME,
+  DART_LANGUAGE_ID,
+  SCAN_COMPLETE_MESSAGE,
+  TOGGLE_COMMAND_ID,
+  DETECTION_ENABLED_MESSAGE,
+  DETECTION_DISABLED_MESSAGE
+} from './constants';
 import { WorkspaceScanner } from './services/workspace-scanner';
 import { TranslateMeCodeActionProvider } from './providers/code-actions-provider';
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 let workspaceScanner: WorkspaceScanner;
+let isDetectionEnabled = true; // Detection is enabled by default
 
 /**
  * Extension activation
@@ -68,7 +76,9 @@ function registerCodeActionProvider(context: vscode.ExtensionContext): void {
  * Performs initial scan on activation
  */
 async function performInitialScan(): Promise<void> {
-  await workspaceScanner.scanWorkspace();
+  if (isDetectionEnabled) {
+    await workspaceScanner.scanWorkspace();
+  }
 }
 
 /**
@@ -86,7 +96,7 @@ function registerEventListeners(): void {
  * Handles document save events
  */
 function handleDocumentSave(document: vscode.TextDocument): void {
-  if (document.languageId === DART_LANGUAGE_ID) {
+  if (document.languageId === DART_LANGUAGE_ID && isDetectionEnabled) {
     workspaceScanner.scanFile(document);
   }
 }
@@ -96,7 +106,7 @@ function handleDocumentSave(document: vscode.TextDocument): void {
  */
 let changeTimeout: NodeJS.Timeout | undefined;
 function handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
-  if (event.document.languageId === DART_LANGUAGE_ID) {
+  if (event.document.languageId === DART_LANGUAGE_ID && isDetectionEnabled) {
     // Debounce changes to avoid too frequent scans
     if (changeTimeout) {
       clearTimeout(changeTimeout);
@@ -113,13 +123,35 @@ function handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
  */
 function registerCommands(context: vscode.ExtensionContext): void {
   const scanCommand = vscode.commands.registerCommand('translate-me.scan', handleScanCommand);
+  const toggleCommand = vscode.commands.registerCommand(TOGGLE_COMMAND_ID, handleToggleCommand);
+
   context.subscriptions.push(scanCommand);
+  context.subscriptions.push(toggleCommand);
 }
 
 /**
  * Handles manual scan command
  */
 async function handleScanCommand(): Promise<void> {
-  await workspaceScanner.scanWorkspace();
-  vscode.window.showInformationMessage(SCAN_COMPLETE_MESSAGE);
+  if (isDetectionEnabled) {
+    await workspaceScanner.scanWorkspace();
+    vscode.window.showInformationMessage(SCAN_COMPLETE_MESSAGE);
+  }
+}
+
+/**
+ * Handles toggle detection command
+ */
+async function handleToggleCommand(): Promise<void> {
+  isDetectionEnabled = !isDetectionEnabled;
+
+  if (isDetectionEnabled) {
+    // If enabled, perform a scan of the workspace
+    await workspaceScanner.scanWorkspace();
+    vscode.window.showInformationMessage(DETECTION_ENABLED_MESSAGE);
+  } else {
+    // If disabled, clear all diagnostics
+    diagnosticCollection.clear();
+    vscode.window.showInformationMessage(DETECTION_DISABLED_MESSAGE);
+  }
 }
