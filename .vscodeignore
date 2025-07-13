@@ -1,5 +1,17 @@
 
-node_modules/
 .vscode/
 out/test/
 test/
+src/
+tsconfig.json
+.gitignore
+.git/
+*.vsix
+node_modules/**/test/**
+node_modules/**/tests/**
+node_modules/**/*.md
+node_modules/**/*.txt
+node_modules/**/LICENSE*
+node_modules/**/CHANGELOG*
+node_modules/**/.eslint*
+node_modules/**/.*
