@@ -127,9 +127,8 @@ function findCustomWidgetStringMatches(content: string, knownWidgets: Array<{ wi
   // Lista de widgets conhecidos para evitar duplicatas
   const knownWidgetNames = new Set(knownWidgets.map(w => w.widget));
 
-  // Regex para encontrar possíveis widgets customizados
-  // Procura por PascalCase seguido de parênteses (convenção de widgets Flutter)
-  const customWidgetRegex = /\b([A-Z][a-zA-Z0-9_]*)\s*\(/g;
+  // Regex para encontrar possíveis widgets customizados (incluindo const)
+  const customWidgetRegex = /(?:const\s+)?\b([A-Z][a-zA-Z0-9_]*)\s*\(/g;
 
   let match: RegExpExecArray | null;
   while ((match = customWidgetRegex.exec(content)) !== null) {
@@ -151,7 +150,8 @@ function findCustomWidgetStringMatches(content: string, knownWidgets: Array<{ wi
       // Verificar se realmente parece ser um widget (tem parâmetros nomeados)
       if (looksLikeWidget(widgetContent)) {
         // Encontrar strings dentro do widget
-        const stringMatches = findStringsInWidget(widgetContent, widgetStart + widgetName.length + 1, content);
+        /// OLD const stringMatches = findStringsInWidget(widgetContent, widgetStart + match[0].length - 1, content);
+        const stringMatches = findStringsInWidget(widgetContent, openParenIndex + 1, content);
 
         for (const stringMatch of stringMatches) {
           // Verificar se a string não é uma tradução já existente
@@ -277,8 +277,8 @@ function removeComments(content: string): string {
 function findWidgetStringMatches(content: string, widgetName: string, params: string[]): StringMatch[] {
   const matches: StringMatch[] = [];
 
-  // Regex mais robusta para encontrar instâncias do widget (melhor suporte a multiline e parenteses aninhados)
-  const widgetRegex = new RegExp(`\\b${widgetName}\\s*\\(`, 'g');
+  // Regex mais robusta para encontrar instâncias do widget (incluindo const)
+  const widgetRegex = new RegExp(`(?:const\\s+)?\\b${widgetName}\\s*\\(`, 'g');
 
   let widgetMatch: RegExpExecArray | null;
   while ((widgetMatch = widgetRegex.exec(content)) !== null) {
@@ -290,7 +290,7 @@ function findWidgetStringMatches(content: string, widgetName: string, params: st
 
     if (widgetContent) {
       // Encontrar strings dentro do widget
-      const stringMatches = findStringsInWidget(widgetContent, widgetStart + widgetName.length + 1, content);
+      const stringMatches = findStringsInWidget(widgetContent, openParenIndex + 1, content);
 
       for (const stringMatch of stringMatches) {
         // Verificar se a string não é uma tradução já existente
@@ -343,14 +343,22 @@ function findStringsInWidget(widgetContent: string, startOffset: number, fullCon
     const stringContent = match[2]; // Conteúdo da string sem as aspas
     const fullString = match[0]; // String completa com aspas
 
-    // Filtrar strings muito curtas (provavelmente não são texto para usuário)
-    if (stringContent.length < 2) continue;
+    // Permitir strings vazias para widgets específicos (podem ser relevantes para i18n)
+    // Filtrar apenas strings que não são nem texto nem placeholders úteis
+    if (stringContent.length === 0) {
+      // Permitir strings vazias em widgets como Text, título, etc.
+      // Elas podem ser placeholders que precisam ser traduzidos
+    }
 
     // Filtrar strings que parecem ser código (contém caracteres especiais)
-    if (isCodeString(stringContent)) continue;
+    if (isCodeString(stringContent)) {
+      continue;
+    }
 
     // Verificar se não é uma variável ou chamada de função
-    if (isVariableOrFunction(widgetContent, match.index, stringContent)) continue;
+    if (isVariableOrFunction(widgetContent, match.index, stringContent)) {
+      continue;
+    }
 
     const absoluteStart = startOffset + match.index;
     const position = getLineAndColumn(fullContent, absoluteStart);
@@ -406,26 +414,34 @@ function isTranslationCall(stringContent: string): boolean {
 
 function isCodeString(stringContent: string): boolean {
   // Filtrar strings que provavelmente são código, não texto de usuário
-  const codePatterns = [
-    /^[a-zA-Z_][a-zA-Z0-9_]*$/, // Identificadores simples (mas permitir se tiver espaços)
-    /^[0-9]+$/, // Apenas números
-    /^[0-9a-fA-F]{8,}$/, // Hashes/IDs
-    /^[\/\\]/, // Paths
-    /^https?:\/\//, // URLs
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, // Emails
-    /^#[0-9a-fA-F]{6}$/, // Cores hex
-    /^[A-Z_][A-Z0-9_]*$/, // Constantes (mas só se não tiver espaços)
-    /^\$[a-zA-Z_]/, // Variáveis interpoladas
-    /^[{}[\]()<>]$/, // Símbolos únicos
-    /^[a-z]+\.[a-z]+/, // Propriedades de objetos (ex: app.title)
-  ];
-
   const trimmed = stringContent.trim();
+
+  // Permitir strings vazias (podem ser placeholders importantes)
+  if (trimmed.length === 0) return false;
 
   // Se contém espaços ou pontuação de texto, provavelmente é texto de usuário
   if (/\s/.test(trimmed) || /[.!?,:;]/.test(trimmed)) {
     return false;
   }
+
+  // Permitir nomes próprios ou palavras simples (como 'Savana')
+  if (/^[A-Z][a-z]+$/.test(trimmed)) {
+    return false;
+  }
+
+  const codePatterns = [
+    /^[0-9]+$/, // Apenas números
+    /^[0-9a-fA-F]{8,}$/, // Hashes/IDs longos
+    /^[\/\\]/, // Paths
+    /^https?:\/\//, // URLs
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, // Emails
+    /^#[0-9a-fA-F]{6}$/, // Cores hex
+    /^[A-Z_][A-Z0-9_]*$/, // Constantes em maiúsculas
+    /^\$[a-zA-Z_]/, // Variáveis interpoladas
+    /^[{}[\]()<>]$/, // Símbolos únicos
+    /^[a-z]+\.[a-z]+/, // Propriedades de objetos (ex: app.title)
+    /^[a-zA-Z_][a-zA-Z0-9_]*$/, // Identificadores simples apenas se tiverem underscores
+  ];
 
   return codePatterns.some(pattern => pattern.test(trimmed));
 }
@@ -448,7 +464,8 @@ function determineParameter(widgetContent: string, stringContent: string, possib
 }
 
 function getLineAndColumn(content: string, offset: number): { line: number, column: number } {
-  const lines = content.substring(0, offset).split('\n');
+  const beforeOffset = content.substring(0, offset);
+  const lines = beforeOffset.split('\n');
   return {
     line: lines.length - 1,
     column: lines[lines.length - 1].length
