@@ -1,0 +1,32 @@
+---
+description: Project Description
+globs:
+alwaysApply: true
+---
+
+# Projeto: VS Code Extension "translate-me"
+
+Estou desenvolvendo uma extensão para VS Code que detecta strings literais em projetos Flutter para facilitar internacionalização (i18n).
+
+## Funcionalidades atuais:
+- Escaneia arquivos .dart em busca de strings fixas em widgets (Text, Tooltip, AppBar, ElevatedButton, etc.)
+- Usa regex para detectar padrões como: `Text('Savana')`, `ElevatedButton(child: Text('Clique aqui'))`
+- Exibe diagnósticos no editor: "String fixa detectada. Considere usar uma tradução."
+- Ativa automaticamente ao salvar/abrir arquivos .dart
+- Comando manual: "Flutter I18n: Scan por Strings Fixas"
+
+## Stack técnica:
+- TypeScript
+- VS Code API (vscode.languages.createDiagnosticCollection)
+- globby para buscar arquivos .dart
+- Regex para detecção de strings
+
+## Objetivos de evolução:
+1. Melhorar detecção de strings (incluindo multiline)
+2. Tornar analisador mais preciso (evitar falsos positivos)
+3. Adicionar Quick Fix para extrair strings para .arb ou .tr()
+4. Gerar automaticamente arquivos de tradução
+5. Suporte a mais widgets Flutter
+
+## Contexto de ajuda:
+Priorize soluções que melhorem a precisão da detecção, evitem falsos positivos e sejam compatíveis com projetos Flutter reais. Considere edge cases como strings com escape, interpolação e multiline.
