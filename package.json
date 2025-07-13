@@ -2,8 +2,13 @@
   "name": "translate-me",
   "displayName": "Translate Me",
   "description": "Detecta strings fixas em projetos Flutter.",
-  "version": "0.0.1",
-  "publisher": "seuPublisherID",
+  "version": "1.0.0",
+  "publisher": "joaopinacio",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joaopinacio/translate_me.git"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.50.0"
   },
