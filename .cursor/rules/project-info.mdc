@@ -4,29 +4,76 @@ globs:
 alwaysApply: true
 ---
 
-# Projeto: VS Code Extension "translate-me"
+# Project: VS Code Extension "translate-me"
 
-Estou desenvolvendo uma extensão para VS Code que detecta strings literais em projetos Flutter para facilitar internacionalização (i18n).
+I'm developing a VS Code extension that detects literal strings in Flutter projects to facilitate internationalization (i18n).
 
-## Funcionalidades atuais:
-- Escaneia arquivos .dart em busca de strings fixas em widgets (Text, Tooltip, AppBar, ElevatedButton, etc.)
-- Usa regex para detectar padrões como: `Text('Savana')`, `ElevatedButton(child: Text('Clique aqui'))`
-- Exibe diagnósticos no editor: "String fixa detectada. Considere usar uma tradução."
-- Ativa automaticamente ao salvar/abrir arquivos .dart
-- Comando manual: "Flutter I18n: Scan por Strings Fixas"
+## Current Features:
+* Scans .dart files for hardcoded strings in widgets (Text, Tooltip, AppBar, ElevatedButton, etc.)
+* Uses regex to detect patterns like: `Text('Savana')`, `ElevatedButton(child: Text('Click here'))`
+* Displays editor diagnostics: "Hardcoded string detected. Consider using a translation."
+* Automatically activates when saving/opening .dart files
+* Manual command: "Flutter I18n: Scan for Hardcoded Strings"
+* Ignore functionality with comments: `// translate-me-ignore`
 
-## Stack técnica:
-- TypeScript
-- VS Code API (vscode.languages.createDiagnosticCollection)
-- globby para buscar arquivos .dart
-- Regex para detecção de strings
+## Technical Stack:
+* TypeScript
+* VS Code API (vscode.languages.createDiagnosticCollection)
+* globby for .dart file discovery
+* Regex for string detection
 
-## Objetivos de evolução:
-1. Melhorar detecção de strings (incluindo multiline)
-2. Tornar analisador mais preciso (evitar falsos positivos)
-3. Adicionar Quick Fix para extrair strings para .arb ou .tr()
-4. Gerar automaticamente arquivos de tradução
-5. Suporte a mais widgets Flutter
+## Development Goals:
+1. Improve string detection (including multiline)
+2. Make analyzer more precise (avoid false positives)
+3. Add Quick Fix to extract strings to .arb or .tr()
+4. Automatically generate translation files
+5. Support more Flutter widgets
 
-## Contexto de ajuda:
-Priorize soluções que melhorem a precisão da detecção, evitem falsos positivos e sejam compatíveis com projetos Flutter reais. Considere edge cases como strings com escape, interpolação e multiline.
+## Code Quality Standards:
+
+### Clean Code Principles:
+* **Meaningful Names**: Use descriptive variable and function names (e.g., `findHardcodedStrings`, `parseIgnoreComments`)
+* **Single Responsibility**: Each function should have one clear purpose
+* **Small Functions**: Keep functions focused and concise
+* **Comments**: Use comments to explain WHY, not WHAT
+* **Error Handling**: Implement proper error handling and edge cases
+* **Consistent Formatting**: Follow TypeScript/JavaScript conventions
+
+### SOLID Principles:
+* **Single Responsibility Principle (SRP)**: Each class/function handles one specific task
+* **Open/Closed Principle (OCP)**: Code should be open for extension, closed for modification
+* **Liskov Substitution Principle (LSP)**: Derived classes should be substitutable for base classes
+* **Interface Segregation Principle (ISP)**: Prefer small, specific interfaces over large ones
+* **Dependency Inversion Principle (DIP)**: Depend on abstractions, not concretions
+
+### Code Refactoring Techniques:
+* **Extract Method**: Break down complex functions into smaller, focused methods
+* **Extract Constants**: Replace magic numbers/strings with named constants
+* **Remove Duplication**: Apply DRY (Don't Repeat Yourself) principle
+* **Improve Naming**: Use intention-revealing names for variables and functions
+* **Simplify Conditionals**: Use guard clauses and early returns
+* **Modularization**: Separate concerns into different modules/files
+
+### Architecture Guidelines:
+* **Separation of Concerns**: Keep string detection, file processing, and UI logic separate
+* **Dependency Injection**: Use VS Code's context for dependency management
+* **Factory Pattern**: For creating different types of string matchers
+* **Strategy Pattern**: For different detection algorithms (widgets vs custom components)
+* **Observer Pattern**: For file change notifications
+
+### Testing Strategy:
+* Write unit tests for core logic functions
+* Test edge cases (multiline strings, nested widgets, escape sequences)
+* Mock VS Code API for testing
+* Integration tests for full workflow
+* Performance tests for large codebases
+
+### Performance Considerations:
+* **Lazy Loading**: Only scan files when necessary
+* **Caching**: Cache results to avoid reprocessing
+* **Debouncing**: Limit scan frequency on file changes
+* **Async Processing**: Use async/await for non-blocking operations
+* **Memory Management**: Properly dispose of resources
+
+## Help Context:
+Prioritize solutions that improve detection accuracy, avoid false positives, and are compatible with real Flutter projects. Consider edge cases like escaped strings, interpolation, and multiline scenarios. Follow clean code practices, implement SOLID principles, and ensure maintainable, extensible architecture. Focus on performance optimization and comprehensive error handling. 
