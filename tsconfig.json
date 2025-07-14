@@ -9,11 +9,18 @@
     "sourceMap": true,
     "rootDir": "src",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": [
+      "node",
+      "vscode"
+    ],
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
     ".vscode-test",
-    "test"
+    "test",
+    "**/*.test.ts",
+    "jest.config.js"
   ]
 }
