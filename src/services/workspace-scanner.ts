@@ -90,10 +90,10 @@ export class WorkspaceScanner {
     }
 
     /**
-     * Finds all .dart files in the workspace
+     * Finds all .dart files in the workspace (excluding test files)
      */
     private async findDartFiles(rootPath: string): Promise<string[]> {
-        return globby(['**/*.dart'], {
+        return globby(['**/*.dart', '!**/*_test.dart'], {
             cwd: rootPath,
             gitignore: true,
             absolute: true,

@@ -104,6 +104,8 @@ export const NON_WIDGET_PATTERNS = [
     /^(Database|Hive|SqlFlite|Firebase|Firestore)$/,
     // Test classes
     /^(Test|Mock|Fake|Stub|When|Verify|Expect)$/,
+    // Dart core utility classes
+    /^(Uri|UriData|Directory|File|Platform|Process|Socket|HttpClient|Timer|Completer|Stream|Sink|IOSink)$/,
 ];
 
 // Context patterns that indicate not a widget
@@ -150,16 +152,76 @@ export const CODE_PATTERNS = [
     /^[{}[\]()<>]$/, // Single symbols
     /^[a-z]+\.[a-z]+/, // Object properties (e.g., app.title)
     /^[a-zA-Z_][a-zA-Z0-9_]*$/, // Simple identifiers with underscores
+    /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/, // Only symbols/punctuation
+    /^\s*$/, // Empty or whitespace only
+    /^\$[a-zA-Z_][a-zA-Z0-9_]*(?:\s+\$[a-zA-Z_][a-zA-Z0-9_]*)+$/, // Multiple variables
+    /^\$\{[^}]+\}(?:\s+\$\{[^}]+\})*$/, // Variables with braces
+    /^[dMy\/\-\s:HmsS]+$/, // Date/time formats (dd/MM/yyyy, HH:mm:ss)
+    /^[+\-*/=\s]*\$\{[^}]+\}[+\-*/=\s]*$/, // Mainly interpolations (+ ${var})
+    /^[+\-*/=\s]*\$[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*[+\-*/=\s]*$/, // + $var.prop
+    /^assets\//, // Asset paths
+    /^images\//, // Image paths
+    /^img\//, // Image paths (short)
+    /^icons\//, // Icon paths
+    /^fonts\//, // Font paths
+    /\.(png|jpg|jpeg|gif|svg|webp|bmp|ico|tiff|tif)$/i, // Image files
+    /\.(ttf|otf|woff|woff2)$/i, // Font files
+    /^[a-zA-Z0-9_\-\/]+\.(png|jpg|jpeg|gif|svg|webp|bmp|ico|tiff|tif)$/i, // Any image path
+    /^[a-z_]+(?:_[a-z_]+)*$/, // snake_case JSON keys (selected_answers_list, text_evidence)
+    /^[A-Z][a-zA-Z0-9]*\.[a-zA-Z_][a-zA-Z0-9_]*$/, // Class.property debugging (AnswerResponseModel.selectedAnswersList)
+    /^[A-Z][a-zA-Z0-9]*Model\.[a-zA-Z_][a-zA-Z0-9_]*$/, // Model class debugging
+    /^[A-Z][a-zA-Z0-9]*Response\.[a-zA-Z_][a-zA-Z0-9_]*$/, // Response class debugging
+    /^[A-Z][a-zA-Z0-9]*Request\.[a-zA-Z_][a-zA-Z0-9_]*$/, // Request class debugging
+    /^(text|name|id|type|value|data|status|error|result|response|request)$/, // Common JSON keys
+    /\$\{[^}]*\?[^}]*:[^}]*\}/, // Interpolations with ternary operators ${condition ? value : value}
+    /^\$\{[^}]*\([^}]*\)[^}]*\}/, // Interpolations with function calls ${function()}
+    /^[\(\)\s\#\-\.]+$/, // Formatting masks like (##) #####-####
+    /^[\#\-\.\/\s]+$/, // Masks like ###.###.###-##
+    /^[#\s\-\.\/\(\)]+$/, // General mask patterns with # as placeholders
+    /^\[[^\]]*\]$/, // Regex character classes [0-9], [a-zA-Z], etc.
+    /^\[[0-9\-]+\]$/, // Number range patterns [0-9], [0-5], etc.
+    /^\[[a-zA-Z\-]+\]$/, // Letter range patterns [a-zA-Z], [A-Z], etc.
+    /^[X#9A\*]+$/, // Placeholder patterns XXXXX, #####, 99999, AAAAA
+    /^[X#9A\*\-\.\s\(\)\/]+$/, // Complex formatting with placeholders
+    /^[\#\,\.0]+$/, // Number formatting ###,###.00
+    /^[R\$\#\,\.0\s]+$/, // Currency formatting R$ ###,##0.00
+
+    // Technical configuration patterns
+    /^\d+:\d+:[a-z]+:[a-f0-9]+$/, // Firebase App IDs
+    /^[a-z0-9]+(-[a-z0-9]+)*-[a-f0-9]+$/, // Firebase Project IDs
+    /^[a-z0-9]([a-z0-9\-]*[a-z0-9])?\.appspot\.com$/, // Firebase Storage Buckets
+    /^\d+-[a-z0-9]+\.apps\.googleusercontent\.com$/, // Firebase Client IDs
+    /^com\.[a-z0-9]+(\.[a-z0-9]+)+$/, // Bundle IDs
+    /^[a-zA-Z0-9]{20,}$/, // Generic long alphanumeric IDs
+    /^https?:\/\//, // URLs starting with http:// or https://
+    /^[a-z0-9]([a-z0-9\-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]*[a-z0-9])?)*\.[a-z]{2,}$/, // Domain names
+    /^[A-Za-z0-9_\-]{25,}$/, // API Keys and tokens
+    /^\d+\.\d+\.\d+(-[a-zA-Z0-9\-]+)?$/, // Version strings
+    /^[a-z0-9\-]+\.(firebaseio|firestore|googleapis)\.com$/, // Database/resource URLs
+    /^[A-Z_][A-Z0-9_]*$/, // Environment variable references
+    /^#[a-fA-F0-9]{3,8}$/, // Hex colors
+    /^[a-fA-F0-9]{32,}$/, // Long hex hashes
+    /^[a-zA-Z0-9_\-\/]+\.[a-zA-Z0-9]{1,4}$/, // File paths with extensions
 ];
 
 // Regular expressions
 export const REGEX_PATTERNS = {
     STRING_LITERAL: /(['"`])((?:\\.|(?!\1)[^\\])*?)\1/g,
     NAMED_PARAMETER: /\b[a-zA-Z_][a-zA-Z0-9_]*\s*:/,
-    CUSTOM_WIDGET: /(?:const\s+)?\b([A-Z][a-zA-Z0-9_]*)\s*\(/g,
+    CUSTOM_WIDGET: /(?:const\s+)?\b([A-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)?)\s*\(/g,
     COMMENT_SINGLE_LINE: /\/\/(?!.*translate-me-ignore).*$/gm,
     COMMENT_MULTI_LINE: /\/\*(?![\s\S]*translate-me-ignore)[\s\S]*?\*\//g,
     PROPER_NOUN: /^[A-Z][a-z]+$/,
     TEXT_PUNCTUATION: /[.!?,:;]/,
     WHITESPACE: /\s/,
+    VARIABLE_INTERPOLATION: /\$[a-zA-Z_][a-zA-Z0-9_]*|\$\{[^}]+\}/g,
+    SYMBOL_ONLY: /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/,
+    DATE_TIME_FORMAT: /^[dMy\/\-\.:Hms\s]+$/,
+    MAINLY_INTERPOLATION: /^[+\-*/=\s]*\$\{[^}]+\}[+\-*/=\s]*$/,
+    ASSET_PATH: /^(assets|images|img|icons|fonts)\/|.*\.(png|jpg|jpeg|gif|svg|webp|bmp|ico|tiff|tif|ttf|otf|woff|woff2)$/i,
+    JSON_KEY_OR_DEBUG: /^[a-z_]+(?:_[a-z_]+)*$|^[A-Z][a-zA-Z0-9]*\.[a-zA-Z_][a-zA-Z0-9_]*$/,
+    TERNARY_INTERPOLATION: /\$\{[^}]*\?[^}]*:[^}]*\}/, // Ternary operators in interpolations
+    FUNCTION_INTERPOLATION: /\$\{[^}]*\([^}]*\)[^}]*\}/, // Function calls in interpolations
+    FORMATTING_MASK: /^[\(\)\s\#\-\.]+$|^\[[^\]]*\]$/, // Formatting masks and regex patterns
+    REGEX_PATTERN: /^\[[0-9a-zA-Z\-\s\\dDwWsS]*\]$/, // Character classes and regex patterns
 } as const; 

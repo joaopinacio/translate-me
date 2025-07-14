@@ -5,7 +5,7 @@
 import { StringMatch, IgnoreRule } from '../types';
 import { REGEX_PATTERNS } from '../constants';
 import { getLineAndColumn } from '../utils/position';
-import { isCodeString, isVariableOrFunction, isTranslationCall } from '../utils/filters';
+import { shouldFilterString, isVariableOrFunction, isTranslationCall } from '../utils/filters';
 
 /**
  * Finds string literals within widget content
@@ -22,13 +22,8 @@ export function findStringsInWidget(
         const stringContent = match[2]; // Content without quotes
         const fullString = match[0]; // Full string with quotes
 
-        // Allow empty strings for specific widgets (may be relevant for i18n)
-        if (stringContent.length === 0) {
-            // Empty strings in widgets like Text, title, etc. may be placeholders
-        }
-
-        // Filter strings that appear to be code
-        if (isCodeString(stringContent)) {
+        // Filter strings that should not be translated
+        if (shouldFilterString(stringContent)) {
             continue;
         }
 

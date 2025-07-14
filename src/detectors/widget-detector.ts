@@ -49,17 +49,22 @@ export function findCustomWidgetMatches(content: string, knownWidgets: WidgetPat
     const matches: StringMatch[] = [];
     const knownWidgetNames = new Set(knownWidgets.map(w => w.widget));
 
-    const customWidgetRegex = /(?:const\s+)?\b([A-Z][a-zA-Z0-9_]*)\s*\(/g;
+    // Updated regex to detect both direct constructors and static methods
+    // Matches: WidgetName( and WidgetName.methodName(
+    const customWidgetRegex = /(?:const\s+)?\b([A-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)?)\s*\(/g;
 
     let match: RegExpExecArray | null;
     while ((match = customWidgetRegex.exec(content)) !== null) {
-        const widgetName = match[1];
+        const widgetName = match[1]; // This can now be "WidgetName" or "WidgetName.methodName"
+
+        // Extract the base widget name for known widget check
+        const baseWidgetName = widgetName.split('.')[0];
 
         // Skip if it's a known widget (already processed)
-        if (knownWidgetNames.has(widgetName)) continue;
+        if (knownWidgetNames.has(baseWidgetName)) continue;
 
         // Filter out classes/types that are not widgets
-        if (isNotAWidget(widgetName, content, match.index)) continue;
+        if (isNotAWidget(baseWidgetName, content, match.index)) continue;
 
         const widgetStart = match.index;
         const openParenIndex = match.index + match[0].length - 1;
@@ -76,7 +81,7 @@ export function findCustomWidgetMatches(content: string, knownWidgets: WidgetPat
             if (!isTranslationCall(stringMatch.content)) {
                 matches.push({
                     ...stringMatch,
-                    widget: widgetName,
+                    widget: widgetName, // Use the full name (e.g., "VitrineModal.primaryWithOneCta")
                     parameter: determineGenericParameter(widgetContent, stringMatch.content)
                 });
             }

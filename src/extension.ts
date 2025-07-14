@@ -93,10 +93,17 @@ function registerEventListeners(): void {
 }
 
 /**
+ * Checks if a file is a test file (ends with _test.dart)
+ */
+function isTestFile(filePath: string): boolean {
+  return filePath.endsWith('_test.dart');
+}
+
+/**
  * Handles document save events
  */
 function handleDocumentSave(document: vscode.TextDocument): void {
-  if (document.languageId === DART_LANGUAGE_ID && isDetectionEnabled) {
+  if (document.languageId === DART_LANGUAGE_ID && isDetectionEnabled && !isTestFile(document.fileName)) {
     workspaceScanner.scanFile(document);
   }
 }
@@ -106,7 +113,7 @@ function handleDocumentSave(document: vscode.TextDocument): void {
  */
 let changeTimeout: NodeJS.Timeout | undefined;
 function handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
-  if (event.document.languageId === DART_LANGUAGE_ID && isDetectionEnabled) {
+  if (event.document.languageId === DART_LANGUAGE_ID && isDetectionEnabled && !isTestFile(event.document.fileName)) {
     // Debounce changes to avoid too frequent scans
     if (changeTimeout) {
       clearTimeout(changeTimeout);
