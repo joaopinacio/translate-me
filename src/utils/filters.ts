@@ -7,7 +7,8 @@ import {
     TRANSLATION_PATTERNS,
     NON_WIDGET_PATTERNS,
     CONTEXT_PATTERNS,
-    REGEX_PATTERNS
+    REGEX_PATTERNS,
+    TECHNICAL_PARAMETERS
 } from '../constants';
 
 /**
@@ -59,12 +60,32 @@ export function shouldFilterString(stringContent: string): boolean {
 }
 
 /**
- * Determines if a string contains only symbols/punctuation
+ * Determines if a string contains only symbols, punctuation, or visual formatting
  */
 export function isOnlySymbols(stringContent: string): boolean {
-    // Check if string contains only symbols, punctuation, or special characters
+    // Check if string contains only symbols, punctuation, or special characters (without spaces)
     const symbolOnlyPattern = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/;
-    return symbolOnlyPattern.test(stringContent);
+    if (symbolOnlyPattern.test(stringContent)) {
+        return true;
+    }
+
+    // Check for visual symbols with spaces (bullets, separators, etc.)
+    const visualSymbolsPattern = /^[\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`•▪◦‣⁃∘‧⋅※★☆◊◈▸▹►◂◃▶▷◀◁→←↑↓↔↕⇒⇔⟩⟨⟪⟫⦾⦿]+$/;
+    if (visualSymbolsPattern.test(stringContent)) {
+        return true;
+    }
+
+    // Check for strings that are mainly whitespace with minimal visual symbols
+    const trimmed = stringContent.trim();
+    if (trimmed.length <= 3) {
+        // Short strings with only visual/formatting characters
+        const formatPattern = /^[•▪◦‣⁃∘‧⋅※★☆◊◈▸▹►◂◃▶▷◀◁→←↑↓↔↕⇒⇔⟩⟨⟪⟫⦾⦿\-_|\.,:;!@#$%^&*()+=\[\]{}<>\/?~`"'\\]+$/;
+        if (formatPattern.test(trimmed)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -251,6 +272,18 @@ export function isVariableInterpolation(stringContent: string): boolean {
 }
 
 /**
+ * Checks if a string is inside a Uri.parse() call
+ */
+export function isUriParseString(widgetContent: string, stringIndex: number): boolean {
+    // Look backwards from the string position to find Uri.parse(
+    const beforeString = widgetContent.substring(0, stringIndex);
+
+    // Check if there's a Uri.parse( pattern before this string
+    const uriParsePattern = /Uri\.parse\s*\(\s*$/;
+    return uriParsePattern.test(beforeString);
+}
+
+/**
  * Determines if a string is technical configuration (Firebase IDs, URLs, bundle IDs, etc.)
  */
 export function isTechnicalConfiguration(stringContent: string): boolean {
@@ -377,4 +410,22 @@ export function looksLikeWidget(widgetContent: string): boolean {
     ];
 
     return !commonFunctionPatterns.some(pattern => pattern.test(widgetContent.trim()));
+}
+
+/**
+ * Checks if a string is inside a technical parameter that should not be translated
+ */
+export function isTechnicalParameter(widgetContent: string, stringIndex: number): boolean {
+    // Find the parameter name before this string
+    const beforeString = widgetContent.substring(0, stringIndex);
+
+    // Look for the last parameter name before this string
+    const parameterMatch = beforeString.match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*$/);
+
+    if (parameterMatch) {
+        const parameterName = parameterMatch[1];
+        return TECHNICAL_PARAMETERS.includes(parameterName);
+    }
+
+    return false;
 } 

@@ -5,10 +5,10 @@
 import { StringMatch, IgnoreRule } from '../types';
 import { REGEX_PATTERNS } from '../constants';
 import { getLineAndColumn } from '../utils/position';
-import { shouldFilterString, isVariableOrFunction, isTranslationCall } from '../utils/filters';
+import { shouldFilterString, isVariableOrFunction, isTranslationCall, isUriParseString, isTechnicalParameter } from '../utils/filters';
 
 /**
- * Finds string literals within widget content
+ * Finds string literals within widget content, handling Dart interpolated strings correctly
  */
 export function findStringsInWidget(
     widgetContent: string,
@@ -17,10 +17,12 @@ export function findStringsInWidget(
 ): StringMatch[] {
     const matches: StringMatch[] = [];
 
-    let match: RegExpExecArray | null;
-    while ((match = REGEX_PATTERNS.STRING_LITERAL.exec(widgetContent)) !== null) {
-        const stringContent = match[2]; // Content without quotes
-        const fullString = match[0]; // Full string with quotes
+    // Use custom string detection instead of regex to handle interpolated strings
+    const stringMatches = findStringLiterals(widgetContent);
+
+    for (const stringMatch of stringMatches) {
+        const stringContent = stringMatch.content; // Content without quotes
+        const fullString = stringMatch.fullString; // Full string with quotes
 
         // Filter strings that should not be translated
         if (shouldFilterString(stringContent)) {
@@ -28,13 +30,23 @@ export function findStringsInWidget(
         }
 
         // Check if it's not a variable or function call
-        if (isVariableOrFunction(widgetContent, match.index, stringContent)) {
+        if (isVariableOrFunction(widgetContent, stringMatch.startIndex, stringContent)) {
             continue;
         }
 
-        const absoluteStart = startOffset + match.index;
+        // Check if this string is inside a Uri.parse() call
+        if (isUriParseString(widgetContent, stringMatch.startIndex)) {
+            continue;
+        }
+
+        // Check if this string is in a technical parameter that should not be translated
+        if (isTechnicalParameter(widgetContent, stringMatch.startIndex)) {
+            continue;
+        }
+
+        const absoluteStart = startOffset + stringMatch.startIndex;
         const position = getLineAndColumn(fullContent, absoluteStart);
-        const endPosition = getLineAndColumn(fullContent, absoluteStart + match[0].length);
+        const endPosition = getLineAndColumn(fullContent, absoluteStart + stringMatch.length);
 
         matches.push({
             content: fullString,
@@ -48,6 +60,111 @@ export function findStringsInWidget(
     }
 
     return matches;
+}
+
+/**
+ * Custom string literal detection that handles Dart interpolated strings correctly
+ */
+function findStringLiterals(content: string): Array<{
+    content: string;
+    fullString: string;
+    startIndex: number;
+    length: number;
+}> {
+    const matches: Array<{
+        content: string;
+        fullString: string;
+        startIndex: number;
+        length: number;
+    }> = [];
+
+    let i = 0;
+    while (i < content.length) {
+        const char = content[i];
+
+        // Check for string start
+        if (char === '"' || char === "'" || char === '`') {
+            const stringResult = extractStringLiteral(content, i);
+            if (stringResult) {
+                matches.push(stringResult);
+                i = stringResult.startIndex + stringResult.length;
+            } else {
+                i++;
+            }
+        } else {
+            i++;
+        }
+    }
+
+    return matches;
+}
+
+/**
+ * Extract a complete string literal starting at the given index, handling interpolations
+ */
+function extractStringLiteral(content: string, startIndex: number): {
+    content: string;
+    fullString: string;
+    startIndex: number;
+    length: number;
+} | null {
+    const stringChar = content[startIndex];
+    let i = startIndex + 1;
+    let inInterpolation = false;
+    let interpolationDepth = 0;
+
+    while (i < content.length) {
+        const char = content[i];
+        const nextChar = i + 1 < content.length ? content[i + 1] : '';
+
+        // Handle Dart string interpolation
+        if (char === '$' && nextChar === '{') {
+            inInterpolation = true;
+            interpolationDepth = 0;
+            i += 2; // Skip ${ 
+            continue;
+        }
+
+        if (inInterpolation) {
+            if (char === '{') {
+                interpolationDepth++;
+            } else if (char === '}') {
+                if (interpolationDepth === 0) {
+                    inInterpolation = false;
+                } else {
+                    interpolationDepth--;
+                }
+            }
+        } else {
+            // Only check for string end when not in interpolation
+            if (char === stringChar) {
+                // Check if it's not escaped
+                let escapeCount = 0;
+                let j = i - 1;
+                while (j >= 0 && content[j] === '\\') {
+                    escapeCount++;
+                    j--;
+                }
+
+                // If even number of escapes (including 0), the quote is not escaped
+                if (escapeCount % 2 === 0) {
+                    const fullString = content.substring(startIndex, i + 1);
+                    const stringContent = content.substring(startIndex + 1, i);
+
+                    return {
+                        content: stringContent,
+                        fullString: fullString,
+                        startIndex: startIndex,
+                        length: i - startIndex + 1
+                    };
+                }
+            }
+        }
+
+        i++;
+    }
+
+    return null; // Unterminated string
 }
 
 /**

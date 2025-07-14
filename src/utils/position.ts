@@ -18,21 +18,25 @@ export function getLineAndColumn(content: string, offset: number): Position {
 
 /**
  * Extracts balanced parentheses content from a given start position, respecting string literals
+ * including Dart string interpolation patterns like ${expression}
  */
 export function extractBalancedParentheses(content: string, startIndex: number): string | null {
     let depth = 0;
     let i = startIndex;
     let inString = false;
     let stringChar = '';
+    let inInterpolation = false;
+    let interpolationDepth = 0;
 
     while (i < content.length) {
         const char = content[i];
+        const nextChar = i + 1 < content.length ? content[i + 1] : '';
 
         // Handle string literals
         if (!inString && (char === '"' || char === "'" || char === '`')) {
             inString = true;
             stringChar = char;
-        } else if (inString && char === stringChar) {
+        } else if (inString && char === stringChar && !inInterpolation) {
             // Check if it's not escaped
             let escapeCount = 0;
             let j = i - 1;
@@ -47,8 +51,25 @@ export function extractBalancedParentheses(content: string, startIndex: number):
             }
         }
 
-        // Only balance parentheses when not inside a string
-        if (!inString) {
+        // Handle Dart string interpolation
+        if (inString && char === '$' && nextChar === '{') {
+            inInterpolation = true;
+            interpolationDepth = 0;
+            i++; // Skip the '{'
+        } else if (inInterpolation) {
+            if (char === '{') {
+                interpolationDepth++;
+            } else if (char === '}') {
+                if (interpolationDepth === 0) {
+                    inInterpolation = false;
+                } else {
+                    interpolationDepth--;
+                }
+            }
+        }
+
+        // Only balance parentheses when not inside a string (unless it's part of interpolation)
+        if (!inString || inInterpolation) {
             if (char === '(') {
                 depth++;
             } else if (char === ')') {

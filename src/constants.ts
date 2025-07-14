@@ -30,6 +30,7 @@ export const KNOWN_WIDGET_PATTERNS: WidgetPattern[] = [
     { widget: 'Tooltip', params: ['message'] },
     { widget: 'SnackBar', params: ['content'] },
     { widget: 'AppBar', params: ['title'] },
+    { widget: 'Hero', params: ['child'] }, // tag parameter should be filtered
 
     // Buttons
     { widget: 'ElevatedButton', params: ['child'] },
@@ -86,6 +87,32 @@ export const KNOWN_WIDGET_PATTERNS: WidgetPattern[] = [
     { widget: 'DataTable', params: [''] },
     { widget: 'DataColumn', params: ['label'] },
     { widget: 'DataCell', params: [''] },
+];
+
+// Technical parameters that should not be translated (identifiers, keys, etc.)
+export const TECHNICAL_PARAMETERS = [
+    'tag', // Hero widget tag
+    'key', // Widget key
+    'heroTag', // FloatingActionButton heroTag
+    'restorationId', // Restoration ID
+    'semanticLabel', // For accessibility but often technical
+    'debugLabel', // Debug labels
+    'name', // Named route or identifier
+    'routeName', // Route names
+    'actionKey', // Action identifiers
+    'valueKey', // Value keys
+    'groupValue', // Radio button group values
+    'buttonTextTheme', // Theme identifiers
+    'materialTapTargetSize', // Size identifiers
+    'visualDensity', // Density identifiers
+    'clipBehavior', // Clip behavior identifiers
+    'overflow', // Overflow behavior identifiers
+    'textDirection', // Direction identifiers
+    'textAlign', // Alignment identifiers
+    'textBaseline', // Baseline identifiers
+    'fontFamily', // Font family names
+    'package', // Package identifiers
+    'semanticsLabel', // Screen reader labels (often technical)
 ];
 
 // Patterns for classes that are not widgets
