@@ -111,7 +111,7 @@ function handleDocumentSave(document: vscode.TextDocument): void {
 /**
  * Handles document change events with debouncing
  */
-let changeTimeout: NodeJS.Timeout | undefined;
+let changeTimeout: any;
 function handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
   if (event.document.languageId === DART_LANGUAGE_ID && isDetectionEnabled && !isTestFile(event.document.fileName)) {
     // Debounce changes to avoid too frequent scans

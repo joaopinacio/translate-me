@@ -116,6 +116,14 @@ src/
 * Integration tests for full workflow
 * Performance tests for large codebases
 
+1. Always verify if tests exist for new features
+2. Create tests immediately if they don't exist
+3. Ensure test coverage for every new functionality
+4. Validate that tests pass after implementation
+5. Prevent regressions with comprehensive testing
+
+This practice ensures the project maintains high quality and stability as new features are added.
+
 ## Help Context
 Prioritize solutions that:
 - Maintain the modular architecture

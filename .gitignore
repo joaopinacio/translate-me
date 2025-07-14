@@ -9,6 +9,15 @@ out/
 dist/
 *.vsix
 
+# Test compiled files (TypeScript compilation artifacts)
+test/**/*.js
+test/**/*.js.map
+
+# Jest cache and coverage
+.jest/
+jest-cache/
+coverage/
+
 # OS files
 .DS_Store
 .DS_Store?

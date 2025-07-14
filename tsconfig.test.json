@@ -1,0 +1,29 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "out",
+        "types": [
+            "jest",
+            "node"
+        ],
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "lib": [
+            "es2020",
+            "dom"
+        ],
+        "target": "es2020",
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*",
+        "test/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        ".vscode-test",
+        "out"
+    ]
+}
