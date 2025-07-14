@@ -154,17 +154,6 @@ Column(
   - 📊 Presentations or demos
   - 🚀 When ready to work on i18n later
 
-## 🔧 Technical Details
-
-### Architecture
-- **Clean Code**: Meaningful names, small functions, single responsibility
-- **SOLID Principles**: Proper separation of concerns and dependency management  
-- **Modular Architecture**: Each module has a specific responsibility
-- **Error Handling**: Comprehensive error handling throughout
-- **Performance**: Optimized for large codebases with debounced scanning
-
-
-
 ## 🛠️ Development
 
 ```bash
