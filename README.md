@@ -176,6 +176,12 @@ npm run compile
 
 # Run extension in development
 F5 in VS Code
+
+# Package extension for distribution
+vsce package
+
+# Publish extension to VS Code Marketplace
+vsce publish
 ```
 
 ## 🤝 Contributing
